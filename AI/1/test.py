@@ -1,7 +1,7 @@
 import sys
 
 
-class compete:
+class Compete:
     def __init__(self, size=3):
         self.pos_size = size ** 2
         self.arr = ['' for _ in range(size ** 2)]
@@ -30,7 +30,10 @@ class compete:
             self.HUMAN_TURN = False
             self.HUMAN_MARK, self.AI_MARK = 'O', 'X'
 
-    def is_not_win(self):
+    def is_win(self):
+        if len(self.empty_pos()) == 0:
+            return 'fair'
+
         win_cases = [[0, 1, 2], [0, 3, 6], [0, 4, 8],
                      [3, 4, 5], [1, 4, 7], [2, 4, 6],
                      [6, 7, 8], [2, 5, 8]]
@@ -41,49 +44,103 @@ class compete:
                 win_pool.add(self.arr[index])
             if len(win_pool) == 1 and '' not in win_pool:
                 if self.HUMAN_MARK in win_pool:
-                    self.HUMAN_WIN = True
-                    return False
+                    return 'HUMAN'
                 else:
-                    self.AI_WIN = True
-                    return False
+                    return 'AI'
 
-        return True
+        return False
 
-    def mark(self):
+    def mark(self, pos):
+        if self.HUMAN_TURN:
+            self.arr[int(pos) - 1] = self.HUMAN_MARK
+            self.HUMAN_TURN = False
+        else:
+            self.arr[int(pos) - 1] = self.AI_MARK
+            self.HUMAN_TURN = True
+
+    def clear_mark(self, pos):
+        self.arr[int(pos) - 1] = ''
+        self.HUMAN_TURN = not self.HUMAN_TURN
+
+    def turn(self):
         if self.HUMAN_TURN:
             sys.stderr.write('please input position:')
             pos = input()
 
-            if int(pos) > self.pos_size or int(pos) < 0:
+            if int(pos) not in list(range(1, 10)):
                 sys.stderr.write('too large number for input!\n')
             elif self.arr[int(pos) - 1] != '':
                 sys.stderr.write('this place has been marked!\n')
             else:
-                self.arr[int(pos) - 1] = self.HUMAN_MARK
-                self.HUMAN_TURN = False
+                self.mark(pos)
                 self.plot_block()
 
         else:
             sys.stderr.write('----AI turn--------')
             sys.stderr.write('\n')
-            for i, _ in enumerate(self.arr):
-                if self.arr[i] == '':
-                    self.arr[i] = self.AI_MARK
-                    self.HUMAN_TURN = True
+            zero_score_arr = []
+            for pos in self.empty_pos():
+                self.mark(pos)
+                score = self.ai_minmax(-1, 1)
+                self.clear_mark(pos)
+
+                if score == 1:
+                    self.mark(pos)
                     self.plot_block()
+                    sys.stdout.write(str(pos))
+                    sys.stderr.write('\n')
                     break
-            self.HUMAN_TURN = True
+                elif score == 0:
+                    zero_score_arr.append(score)
+
+            if not self.HUMAN_TURN:
+                self.mark(pos)
+                self.plot_block()
+                sys.stdout.write(str(pos))
+                sys.stderr.write('\n')
+
+    def empty_pos(self):
+
+        return [i + 1 for i in range(len(self.arr)) if self.arr[i] == '']
+
+    def ai_minmax(self, min, max):
+        if self.is_win() and self.is_win() == 'HUMAN':
+            return -1
+        elif self.is_win() and self.is_win() == 'AI':
+            return 1
+        elif len(self.empty_pos()) == 0:
+            return 0
+
+        for pos in self.empty_pos():
+            self.mark(pos)
+            score = self.ai_minmax(min, max)
+            self.clear_mark(pos)
+            if self.HUMAN_TURN and score < max:
+                max = score
+                if min == max:
+                    return max
+            if not self.HUMAN_TURN and score > min:
+                min = score
+                if min == max:
+                    return min
+
+        if self.HUMAN_TURN:
+            return max
+        else:
+            return min
 
     def play(self):
-        while self.is_not_win():
-            self.mark()
-        if self.HUMAN_WIN:
+        while not self.is_win():
+            self.turn()
+        if 'HUMAN' in self.is_win():
             sys.stderr.write('human win')
-        else:
+        elif 'AI' in self.is_win():
             sys.stderr.write('AI win')
+        else:
+            sys.stderr.write('fair')
 
 
 if __name__ == '__main__':
-    test = compete()
+    test = Compete()
     test.check_first()
     test.play()
