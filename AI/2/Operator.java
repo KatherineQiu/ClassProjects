@@ -1,4 +1,18 @@
+import java.util.HashSet;
+import java.util.Set;
+
 public class Operator {
+    public static Set<String> StringOperator(){
+        Set<String> set=new HashSet<String>();
+        set.add("¬");
+        set.add("∨");
+        set.add("∧");
+        set.add("⇒");
+        set.add("⇔");
+
+        return set;
+    }
+
     public static boolean Not(Symbol ori) {
         return !ori.isValue();
     }
@@ -28,7 +42,7 @@ public class Operator {
     }
 
     //test
-    public static void main(String[] args){
-        System.out.println(Operator.Imply(new Symbol(true),new Symbol(true)));
+    public static void main(String[] args) {
+        System.out.println(Operator.Imply(new Symbol(true), new Symbol(true)));
     }
 }
