@@ -36,22 +36,24 @@ public class Basic {
     }
 
     public static void main(String[] args) {
-        System.out.println("---------------------2-----------------------");
+    	System.out.println("---------------------1-----------------------");
         Set<Sentence> kb = new HashSet<Sentence>();
-        Sentence kb_1 = new Sentence("¬A");
-        Sentence kb_2 = new Sentence("B⇔(C∨D)");
-        Sentence kb_3=new Sentence("E⇔(A∨F∨G)");
-        Sentence kb_4=new Sentence("¬B");
-        Sentence kb_5=new Sentence("E");
-        kb.add(kb_1);
-        kb.add(kb_2);
-        kb.add(kb_3);
-        kb.add(kb_4);
-        kb.add(kb_5);
+        kb.add(new Sentence("P"));
+        kb.add(new Sentence("P⇒Q"));
 
-        Sentence alpha = new Sentence("C");
+        Sentence alpha = new Sentence("Q");
 
-        System.out.println("Q:C------"+tt_entails(kb,alpha));
+        System.out.println("Q:Q------"+tt_entails(kb,alpha));
+    	
+        System.out.println("---------------------2-----------------------");
+        kb = new HashSet<Sentence>();
+        kb.add(new Sentence("¬A"));
+        kb.add(new Sentence("B⇔(C∨D)"));
+        kb.add(new Sentence("E⇔(A∨F∨G)"));
+        kb.add(new Sentence("¬B"));
+        kb.add(new Sentence("E"));
+
+        System.out.println("Q:C------"+tt_entails(kb, new Sentence("C")));
 
         System.out.println("---------------------3-----------------------");
         kb = new HashSet<Sentence>();
@@ -106,21 +108,36 @@ public class Basic {
         }
 
         System.out.println("---------------------6-----------------------");
-        kb = new HashSet<Sentence>();
-        kb.add(new Sentence("X∨Y∨Z∨W"));
-        kb.add(new Sentence("A⇔X"));
-        kb.add(new Sentence("B⇔Y∨Z"));
-        kb.add(new Sentence("C⇔A∧B"));
-        kb.add(new Sentence("D⇔X∧Y"));
-        kb.add(new Sentence("E⇔X∧Z"));
-        kb.add(new Sentence("F⇔(D∧¬E)∨(¬D∧E)"));
-        kb.add(new Sentence("G⇔(C⇒F)"));
-        kb.add(new Sentence("H⇔((G∧H)⇒A)"));
+        kb1 = new HashSet<Sentence>();
+        kb1.add(new Sentence("X∨Y∨Z∨W"));
+        kb1.add(new Sentence("A⇔X"));
+        kb1.add(new Sentence("B⇔Y∨Z"));
+        kb1.add(new Sentence("C⇔A∧B"));
+        kb1.add(new Sentence("D⇔X∧Y"));
+        kb1.add(new Sentence("E⇔X∧Z"));
+        kb1.add(new Sentence("F⇔(D∧¬E)∨(¬D∧E)"));
+        kb1.add(new Sentence("G⇔(C⇒F)"));
+        kb1.add(new Sentence("H⇔((G∧H)⇒A)"));
+        
+        
+        kb2 = new HashSet<Sentence>();
+        kb2.add(new Sentence("X∨Y∨Z∨W"));
+        kb2.add(new Sentence("A⇔X"));
+        kb2.add(new Sentence("C⇔A∧(B∨C∨D∨E∨F∨G∨H)"));
+        kb2.add(new Sentence("¬G⇒C"));
+        kb2.add(new Sentence("H⇔((G∧H)⇒A)"));
 
         System.out.println("(a)");
-        System.out.println("Q:X------"+tt_entails(kb, new Sentence("X")));
-        System.out.println("Q:Y------"+tt_entails(kb, new Sentence("Y")));
-        System.out.println("Q:Z------"+tt_entails(kb, new Sentence("Z")));
-        System.out.println("Q:W------"+tt_entails(kb, new Sentence("W")));
+        System.out.println("Q:X------"+tt_entails(kb1, new Sentence("X")));
+        System.out.println("Q:Y------"+tt_entails(kb1, new Sentence("Y")));
+        System.out.println("Q:Z------"+tt_entails(kb1, new Sentence("Z")));
+        System.out.println("Q:W------"+tt_entails(kb1, new Sentence("W")));
+        
+        
+        System.out.println("(b)");
+        System.out.println("Q:X------"+tt_entails(kb2, new Sentence("X")));
+        System.out.println("Q:Y------"+tt_entails(kb2, new Sentence("Y")));
+        System.out.println("Q:Z------"+tt_entails(kb2, new Sentence("Z")));
+        System.out.println("Q:W------"+tt_entails(kb2, new Sentence("W")));
     }
 }
