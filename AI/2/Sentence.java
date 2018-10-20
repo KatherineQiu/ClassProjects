@@ -18,9 +18,8 @@ public class Sentence {
         this.value = value;
     }
 
-    public Set<Symbol> getSymbols(){
+    public Set<String> getSymbols(){
         //ziqiu: return all symbol with name
-        Set<Symbol> set=new HashSet<Symbol>();
         Set<String> letters=new HashSet<String>();
 
         for(int i=0;i<this.value.length();i++){
@@ -30,17 +29,11 @@ public class Sentence {
             }
         }
 
-        for(String letter:letters){
-            set.add(new Symbol(letter));
-        }
-
-        return set;
+        return letters;
     }
 
     private String PreProcess(String value){
-        value=value.trim();
-        value= value.replace("{","");
-        value=value.replace("}","");
+        value=value.replaceAll(" ","");
 
         return value;
     }
@@ -48,7 +41,7 @@ public class Sentence {
     //test
     public static void main(String[] args){
         Sentence sentence=new Sentence("{P,P ⇒ Q}");
-        Set<Symbol> symbols=sentence.getSymbols();
+        Set<String> symbols=sentence.getSymbols();
         System.out.println();
     }
 }
