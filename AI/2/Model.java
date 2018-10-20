@@ -1,3 +1,5 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import javax.management.OperationsException;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +10,10 @@ public class Model{
 
     public Model() {
         this.map = new HashMap<String, Boolean>();
+    }
+
+    public Model(Map<String, Boolean> map) {
+        this.map = map;
     }
 
     public Map<String, Boolean> getMap() {
@@ -25,7 +31,11 @@ public class Model{
 
     public Model clone(){
         Model newModel=new Model();
-        newModel.setMap(this.getMap());
+        Map<String, Boolean> map=new HashMap<String, Boolean>();
+        for(String s:this.getMap().keySet()){
+            map.put(s,this.getMap().get(s));
+        }
+        newModel.setMap(map);
 
         return newModel;
     }
@@ -53,9 +63,32 @@ public class Model{
             return this.map.get(sentenceValue);
         }
 
-        while(sentenceValue.indexOf('(')==0 && sentenceValue.indexOf(')')==sentenceValue.length()-1){
-            sentenceValue=sentenceValue.replace("(","");
-            sentenceValue=sentenceValue.replace(")","");
+        while(sentenceValue.charAt(0)=='(' && sentenceValue.charAt(sentenceValue.length()-1)==')'){
+            String newSen="";
+            for(int i=1;i<sentenceValue.length()-1;i++){
+                newSen+=String.valueOf(sentenceValue.charAt(i));
+            }
+
+            int left=0;
+            for(int i=0;i<newSen.length();i++){
+                char c=newSen.charAt(i);
+                if(c=='('){
+                    left++;
+                }
+                if(c==')'){
+                    left--;
+                    if(left<0){
+                        break;
+                    }
+                }
+            }
+
+            if(left>=0){
+                sentenceValue=newSen;
+            }
+            else{
+                break;
+            }
         }
 
         if(sentenceValue.contains("(") && sentenceValue.contains(")")){
@@ -72,15 +105,22 @@ public class Model{
                 else if(c==')'){
                     left--;
                     if(i!=sentenceValue.length()-1 && left==0){
-                        map.put(i+1,String.valueOf(sentenceValue.charAt(i-1)));
+                        map.put(i+1,String.valueOf(sentenceValue.charAt(i+1)));
                     }
                 }
             }
 
             if(map.values().contains("⇔")){
-                String[] arr=sentenceValue.split("⇔");
-                String firstSentence=arr[0];
-                String secondSentence=arr[1];
+                int max=0;
+                for(Integer i:map.keySet()){
+                    if(map.get(i).equals("⇔")){
+                        if(i>max){
+                            max=i;
+                        }
+                    }
+                }
+                String firstSentence=sentenceValue.substring(0,max);
+                String secondSentence=sentenceValue.substring(max+1);
                 return Operator.Iff(SingleSatisfy(firstSentence),SingleSatisfy(secondSentence));
             }
             else if(map.values().contains("⇒")){
