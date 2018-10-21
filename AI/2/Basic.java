@@ -76,7 +76,7 @@ public class Basic {
         Set<Sentence> kb2 = new HashSet<Sentence>();
         kb2.add(new Sentence("A⇔¬C"));
         kb2.add(new Sentence("B⇔A∧C"));
-        kb2.add(new Sentence("C⇔(B⇔A∧C)"));
+        kb2.add(new Sentence("C⇔B"));
 
         System.out.println("(a)");
         System.out.println("Q:A------"+tt_entails(kb1, new Sentence("A")));
@@ -104,7 +104,7 @@ public class Basic {
         kb.add(new Sentence("L⇔¬B∧¬J"));
 
         for(int i=65;i<=76;i++){
-            System.out.println("Q:"+String.valueOf((char)i)+"------"+tt_entails(kb2, new Sentence(String.valueOf((char)i))));
+            System.out.println("Q:"+String.valueOf((char)i)+"------"+tt_entails(kb, new Sentence(String.valueOf((char)i))));
         }
 
         System.out.println("---------------------6-----------------------");
