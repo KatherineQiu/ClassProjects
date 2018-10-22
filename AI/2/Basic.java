@@ -43,74 +43,122 @@ public class Basic {
         }
     }
 
+    public static String test_both_side(Set<Sentence> kb,Sentence alpha){
+        if(tt_entails(kb,alpha)==true){
+            return "true";
+        }
+        else {
+            if(tt_entails(kb,new Sentence("¬"+alpha.getValue()))==true){
+                return "false";
+            }
+            else {
+                return "not sure";
+            }
+        }
+    }
+
+    public static void print_kb(Set<Sentence> kb){
+        for(Sentence sentence:kb){
+            System.out.println(sentence.getValue());
+        }
+    }
+
     public static void main(String[] args) {
         // run sample problems using truth-table enumeration method
 
-    	System.out.println("---------------------1-----------------------");
-    	// 1.Modus Ponens
+    	System.out.println("---------------------1:Modus Ponens-----------------------");
+        System.out.println("-----letter mapping:same");
+        System.out.println("-----kb:");
         Set<Sentence> kb = new HashSet<Sentence>();
         kb.add(new Sentence("P"));
         kb.add(new Sentence("P⇒Q"));
+        print_kb(kb);
 
-        Sentence alpha = new Sentence("Q");
-
-        System.out.println("Q:Q------"+tt_entails(kb,alpha));
+        System.out.println("-----query:");
+        System.out.println("Q:"+test_both_side(kb,new Sentence("Q")));
     	
-        System.out.println("---------------------2-----------------------");
-        // 2.Wumpus World
-        // A represents P1,1; B represents B1,1; C represents P1,2; D represents P2,1;
-        // E represents B2,1; F represents P2,2; G represents P3,1
+        System.out.println("---------------------2:Wumpus World-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("A -> P1,1");
+        System.out.println("B -> B1,1");
+        System.out.println("C -> P1,2");
+        System.out.println("D -> P2,1");
+        System.out.println("E -> B2,1");
+        System.out.println("F -> P2,2");
+        System.out.println("G -> P3,1");
+
+        System.out.println("-----kb:");
         kb = new HashSet<Sentence>();
         kb.add(new Sentence("¬A"));
         kb.add(new Sentence("B⇔(C∨D)"));
         kb.add(new Sentence("E⇔(A∨F∨G)"));
         kb.add(new Sentence("¬B"));
         kb.add(new Sentence("E"));
+        print_kb(kb);
 
-        System.out.println("Q:C------"+tt_entails(kb, new Sentence("C")));
+        System.out.println("-----query:");
+        System.out.println("C:"+test_both_side(kb, new Sentence("C")));
 
-        System.out.println("---------------------3-----------------------");
-        // 3.Horn Clauses
-        // P represents mythical; Q represents immortal; R represents mammal;
-        // S represents horned; T represents magical
+        System.out.println("---------------------3:Horn Clauses-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("P -> mythical");
+        System.out.println("Q -> immortal");
+        System.out.println("R -> mammal");
+        System.out.println("S -> horned");
+        System.out.println("T -> magical");
+
+        System.out.println("-----kb:");
         kb = new HashSet<Sentence>();
         kb.add(new Sentence("P⇒Q"));
         kb.add(new Sentence("¬P⇒¬Q∧R"));
         kb.add(new Sentence("Q∨R⇒S"));
         kb.add(new Sentence("S⇒T"));
+        print_kb(kb);
 
-        System.out.println("Q:P------"+tt_entails(kb, new Sentence("P")));
-        System.out.println("Q:T------"+tt_entails(kb, new Sentence("T")));
-        System.out.println("Q:S------"+tt_entails(kb, new Sentence("S")));
+        System.out.println("-----query:");
+        System.out.println("P:"+test_both_side(kb, new Sentence("P")));
+        System.out.println("T:"+test_both_side(kb, new Sentence("T")));
+        System.out.println("S:"+test_both_side(kb, new Sentence("S")));
 
-        System.out.println("---------------------4-----------------------");
-        // 4.Liars and Truth-tellers (a)
-        // A represents Amy; B represents Bob; C represents Cal
-        // Each name variable X here means that "X is truth-teller"
+        System.out.println("---------------------4:Liars and Truth-tellers-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("A -> Amy");
+        System.out.println("B -> Bob");
+        System.out.println("C -> Cal");
+        System.out.println("Each name variable X here means that \"X is truth-teller\"");
+
+        System.out.println("(a)");
+        System.out.println("-----kb:");
         Set<Sentence> kb1 = new HashSet<Sentence>();
         kb1.add(new Sentence("A⇔(C∧A)"));
         kb1.add(new Sentence("B⇔¬C"));
         kb1.add(new Sentence("C⇔B∨¬A"));
+        print_kb(kb1);
 
-        System.out.println("(a)");
-        System.out.println("Q:A------"+tt_entails(kb1, new Sentence("A")));
-        System.out.println("Q:B------"+tt_entails(kb1, new Sentence("B")));
-        System.out.println("Q:C------"+tt_entails(kb1, new Sentence("C")));
+        System.out.println("-----query:");
+        System.out.println("A:"+test_both_side(kb1, new Sentence("A")));
+        System.out.println("B:"+test_both_side(kb1, new Sentence("B")));
+        System.out.println("C:"+test_both_side(kb1, new Sentence("C")));
 
         // 4.Liars and Truth-tellers (b)
+        System.out.println("(b)");
+        System.out.println("-----kb:");
         Set<Sentence> kb2 = new HashSet<Sentence>();
         kb2.add(new Sentence("A⇔¬C"));
         kb2.add(new Sentence("B⇔A∧C"));
         kb2.add(new Sentence("C⇔B"));
+        print_kb(kb2);
 
-        System.out.println("(b)");
-        System.out.println("Q:A------"+tt_entails(kb2, new Sentence("A")));
-        System.out.println("Q:B------"+tt_entails(kb2, new Sentence("B")));
-        System.out.println("Q:C------"+tt_entails(kb2, new Sentence("C")));
+        System.out.println("-----query:");
+        System.out.println("A:"+test_both_side(kb2, new Sentence("A")));
+        System.out.println("B:"+test_both_side(kb2, new Sentence("B")));
+        System.out.println("C:"+test_both_side(kb2, new Sentence("C")));
 
-        System.out.println("---------------------5-----------------------");
-        // 5.More Liars and Truth-tellers
-        // each symbol represents the person who has the name of the same first letter
+        System.out.println("---------------------5:More Liars and Truth-tellers-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("each symbol represents the person who has the name of the same first letter");
+
+        System.out.println("-----kb:");
         kb = new HashSet<Sentence>();
         kb.add(new Sentence("A⇔H∧I"));
         kb.add(new Sentence("B⇔A∧L"));
@@ -124,15 +172,20 @@ public class Basic {
         kb.add(new Sentence("J⇔¬A∧¬C"));
         kb.add(new Sentence("K⇔¬D∧¬F"));
         kb.add(new Sentence("L⇔¬B∧¬J"));
+        print_kb(kb);
 
+        System.out.println("-----query:");
         for(int i=65;i<=76;i++){
-            System.out.println("Q:"+String.valueOf((char)i)+"------"+tt_entails(kb, new Sentence(String.valueOf((char)i))));
+            System.out.println(String.valueOf((char)i)+":"+test_both_side(kb, new Sentence(String.valueOf((char)i))));
         }
 
-        System.out.println("---------------------6-----------------------");
-        // 6.The Doors of Enlightenment (a)
-        // For each x in A, B, C, D, E, F, G, and H we assume x means "x is a knight" and ¬x means "x is a knave"
-        // For each x in X Y Z W we assume x means "x is a good door" and ¬x means "x is a bad door"
+        System.out.println("---------------------6:The Doors of Enlightenment-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("For each x in A, B, C, D, E, F, G, and H we assume x means \"x is a knight\" and ¬x means \"x is a knave\"");
+        System.out.println("For each x in X Y Z W we assume x means \"x is a good door\" and ¬x means \"x is a bad door\"");
+
+        System.out.println("(a)");
+        System.out.println("-----kb:");
         kb1 = new HashSet<Sentence>();
         kb1.add(new Sentence("X∨Y∨Z∨W"));
         kb1.add(new Sentence("A⇔X"));
@@ -143,25 +196,29 @@ public class Basic {
         kb1.add(new Sentence("F⇔(D∧¬E)∨(¬D∧E)"));
         kb1.add(new Sentence("G⇔(C⇒F)"));
         kb1.add(new Sentence("H⇔((G∧H)⇒A)"));
+        print_kb(kb1);
 
-        System.out.println("(a)");
-        System.out.println("Q:X------"+tt_entails(kb1, new Sentence("X")));
-        System.out.println("Q:Y------"+tt_entails(kb1, new Sentence("Y")));
-        System.out.println("Q:Z------"+tt_entails(kb1, new Sentence("Z")));
-        System.out.println("Q:W------"+tt_entails(kb1, new Sentence("W")));
+        System.out.println("-----query:");
+        System.out.println("X:"+test_both_side(kb1, new Sentence("X")));
+        System.out.println("Y:"+test_both_side(kb1, new Sentence("Y")));
+        System.out.println("Z:"+test_both_side(kb1, new Sentence("Z")));
+        System.out.println("W:"+test_both_side(kb1, new Sentence("W")));
 
         // 6.The Doors of Enlightenment (b)
+        System.out.println("(b)");
+        System.out.println("-----kb:");
         kb2 = new HashSet<Sentence>();
         kb2.add(new Sentence("X∨Y∨Z∨W"));
         kb2.add(new Sentence("A⇔X"));
         kb2.add(new Sentence("C⇔A∧(B∨C∨D∨E∨F∨G∨H)"));
         kb2.add(new Sentence("¬G⇒C"));
         kb2.add(new Sentence("H⇔((G∧H)⇒A)"));
+        print_kb(kb2);
 
-        System.out.println("(b)");
-        System.out.println("Q:X------"+tt_entails(kb2, new Sentence("X")));
-        System.out.println("Q:Y------"+tt_entails(kb2, new Sentence("Y")));
-        System.out.println("Q:Z------"+tt_entails(kb2, new Sentence("Z")));
-        System.out.println("Q:W------"+tt_entails(kb2, new Sentence("W")));
+        System.out.println("-----query:");
+        System.out.println("X:"+test_both_side(kb2, new Sentence("X")));
+        System.out.println("Y:"+test_both_side(kb2, new Sentence("Y")));
+        System.out.println("Z:"+test_both_side(kb2, new Sentence("Z")));
+        System.out.println("W:"+test_both_side(kb2, new Sentence("W")));
     }
 }
