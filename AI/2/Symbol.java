@@ -1,4 +1,11 @@
+/*
+ * Project 2: Automated Reasoning
+ * @author Ziyi Kou, Ziqiu Wu
+ * @update 2018-10-21
+ */
+
 public class Symbol {
+	// a class for symbols such as P or Q, which have properties of value and name
     private boolean value;
     private String name;
 

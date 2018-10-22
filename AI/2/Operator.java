@@ -1,18 +1,25 @@
+/*
+ * Project 2: Automated Reasoning
+ * @author Ziyi Kou, Ziqiu Wu
+ * @update 2018-10-21
+ */
+
 import java.util.HashSet;
 import java.util.Set;
 
 public class Operator {
+	// set up all operators
     public static Set<String> StringOperator(){
         Set<String> set=new HashSet<String>();
-        set.add("¬");
-        set.add("∨");
-        set.add("∧");
-        set.add("⇒");
-        set.add("⇔");
+        set.add("¬");	// not
+        set.add("∨");	// or
+        set.add("∧");	// and
+        set.add("⇒");	// implies
+        set.add("⇔");	// if and only if
 
         return set;
     }
-
+    // define and express each operator
     public static boolean Not(boolean ori) {
         return !ori;
     }

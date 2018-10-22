@@ -1,6 +1,9 @@
-import com.sun.org.apache.xpath.internal.operations.Bool;
+/*
+ * Project 2: Automated Reasoning
+ * @author Ziyi Kou, Ziqiu Wu
+ * @update 2018-10-21
+ */
 
-import javax.management.OperationsException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,12 +27,14 @@ public class Model{
         this.map = map;
     }
 
-    public Model Assign(Symbol p, Boolean b) {
+    public Model assign(Symbol p, Boolean b) {
+    	// assign true or false to a specific symbol
         this.map.put(p.getName(), b);
         return this;
     }
 
     public Model clone(){
+    	// make a clone version of this model
         Model newModel=new Model();
         Map<String, Boolean> map=new HashMap<String, Boolean>();
         for(String s:this.getMap().keySet()){
@@ -41,7 +46,8 @@ public class Model{
     }
 
 
-    public boolean SatisfyKB(Set<Sentence> kb){
+    public boolean satisfyKB(Set<Sentence> kb){
+    	// check whether all sentences in knowledge base are satisfied
         boolean pool=true;
         for(Sentence s:kb){
             boolean current=Satisfy(s);
@@ -54,15 +60,17 @@ public class Model{
     }
 
     public boolean Satisfy(Sentence sentence){
+    	// check whether a sentence holds within a model
         String sentenceValue=sentence.getValue();
-        return SingleSatisfy(sentenceValue);
+        return singleSatisfy(sentenceValue);
     }
 
-    public boolean SingleSatisfy(String sentenceValue){
+    public boolean singleSatisfy(String sentenceValue){
+    	// get value directly if there is only one symbol
         if(sentenceValue.length()==1){
             return this.map.get(sentenceValue);
         }
-
+        //if there exist a "(" at the front and a ")" at the end, check if they are of a pair so that we can remove them without changing the meaning of sentence
         while(sentenceValue.charAt(0)=='(' && sentenceValue.charAt(sentenceValue.length()-1)==')'){
             String newSen="";
             for(int i=1;i<sentenceValue.length()-1;i++){
@@ -90,7 +98,7 @@ public class Model{
                 break;
             }
         }
-
+        // if there exist "()" among the sentence, take it as an integrated part and operate the operations outside of "()", following the priority
         if(sentenceValue.contains("(") && sentenceValue.contains(")")){
             Map<Integer,String> map=new HashMap<Integer,String>();
             int left=0;
@@ -121,13 +129,13 @@ public class Model{
                 }
                 String firstSentence=sentenceValue.substring(0,max);
                 String secondSentence=sentenceValue.substring(max+1);
-                return Operator.Iff(SingleSatisfy(firstSentence),SingleSatisfy(secondSentence));
+                return Operator.Iff(singleSatisfy(firstSentence),singleSatisfy(secondSentence));
             }
             else if(map.values().contains("⇒")){
                 String[] arr=sentenceValue.split("⇒");
                 String firstSentence=arr[0];
                 String secondSentence=arr[1];
-                return Operator.Imply(SingleSatisfy(firstSentence),SingleSatisfy(secondSentence));
+                return Operator.Imply(singleSatisfy(firstSentence),singleSatisfy(secondSentence));
             }
             else if(map.values().contains("∨") || map.values().contains("∧")){
                 int max=0;
@@ -139,40 +147,45 @@ public class Model{
                     }
                 }
                 if(map.get(max).equals("∨")){
-                    return Operator.Or(SingleSatisfy(sentenceValue.substring(0,max)),SingleSatisfy(sentenceValue.substring(max+1)));
+                    return Operator.Or(singleSatisfy(sentenceValue.substring(0,max)),singleSatisfy(sentenceValue.substring(max+1)));
                 }
                 else{
-                    return Operator.And(SingleSatisfy(sentenceValue.substring(0,max)),SingleSatisfy(sentenceValue.substring(max+1)));
+                    return Operator.And(singleSatisfy(sentenceValue.substring(0,max)),singleSatisfy(sentenceValue.substring(max+1)));
                 }
             }
             else if(map.values().contains("¬")){
-                return Operator.Not(SingleSatisfy(sentenceValue.substring(1)));
+                return Operator.Not(singleSatisfy(sentenceValue.substring(1)));
             }
         }
-
+        
+        // if two parts are connected by "⇔", do IFF operation
         else if(sentenceValue.contains("⇔")){
             String[] arr=sentenceValue.split("⇔");
             String firstSentence=arr[0];
             String secondSentence=arr[1];
-            return Operator.Iff(SingleSatisfy(firstSentence),SingleSatisfy(secondSentence));
+            return Operator.Iff(singleSatisfy(firstSentence),singleSatisfy(secondSentence));
         }
+        // if two parts are connected by "⇒", do Imply operation
         else if(sentenceValue.contains("⇒")){
             String[] arr=sentenceValue.split("⇒");
             String firstSentence=arr[0];
             String secondSentence=arr[1];
-            return Operator.Imply(SingleSatisfy(firstSentence),SingleSatisfy(secondSentence));
+            return Operator.Imply(singleSatisfy(firstSentence),singleSatisfy(secondSentence));
         }
+        // if a sentence contains "∧" or "∨", do operations following the rule left to right
+        // So we split the two parts at the last operator 
         else if(sentenceValue.contains("∧") || sentenceValue.contains("∨")){
             int index=Math.max(sentenceValue.lastIndexOf("∧"),sentenceValue.lastIndexOf("∨"));
             if(sentenceValue.charAt(index)=='∧'){
-                return Operator.And(SingleSatisfy(sentenceValue.substring(0,index)),SingleSatisfy(sentenceValue.substring(index+1)));
+                return Operator.And(singleSatisfy(sentenceValue.substring(0,index)),singleSatisfy(sentenceValue.substring(index+1)));
             }
             else{
-                return Operator.Or(SingleSatisfy(sentenceValue.substring(0,index)),SingleSatisfy(sentenceValue.substring(index+1)));
+                return Operator.Or(singleSatisfy(sentenceValue.substring(0,index)),singleSatisfy(sentenceValue.substring(index+1)));
             }
         }
+        // if two parts are connected by "¬", do Not operation
         else if(sentenceValue.contains("¬")){
-            return Operator.Not(SingleSatisfy(sentenceValue.substring(sentenceValue.indexOf('¬')+1)));
+            return Operator.Not(singleSatisfy(sentenceValue.substring(sentenceValue.indexOf('¬')+1)));
         }
 
         return false;

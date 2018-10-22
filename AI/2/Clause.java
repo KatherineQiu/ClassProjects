@@ -1,6 +1,10 @@
-import java.util.HashMap;
+/*
+ * Project 2: Automated Reasoning
+ * @author Ziyi Kou, Ziqiu Wu
+ * @update 2018-10-21
+ */
+
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class Clause {
@@ -19,11 +23,12 @@ public class Clause {
     }
 
     private String PreProcess(String value){
-
+        //remove all the spaces
         return resort(value.replaceAll(" ",""));
     }
 
     private String resort(String value){
+        // sort literals in a clause in an increasing order of length, if clause contain "∨"
         if(!value.contains("∨")){
             return value;
         }
@@ -43,9 +48,11 @@ public class Clause {
     }
 
     public Clause intersect(Clause c2){
+        // resolve the contradicted literals of a pair of clauses and return the union clause
         Set<String> fore=new HashSet<String>();
         Set<String> back=new HashSet<String>();
 
+        // add values of literals in clause c1 to the set "fore"
         if(this.value.contains("∨")){
             for(String s:this.value.split("∨")){
                 fore.add(s);
@@ -55,6 +62,7 @@ public class Clause {
             fore.add(this.value);
         }
 
+        // add values of literals in clause c2 to the set "back"
         if(c2.getValue().contains("∨")){
             for(String s:c2.getValue().split("∨")){
                 back.add(s);
@@ -64,6 +72,7 @@ public class Clause {
             back.add(c2.getValue());
         }
 
+        // a set to store string, in set "fore", which has contradiction in set "back"
         Set<String> deleteList=new HashSet<String>();
         for(String s1:fore){
             if(back.contains(Not(s1))){
@@ -102,10 +111,11 @@ public class Clause {
     }
 
     private String Not(String liter){
+        // return negated statement
         if(liter.length()==1){
             return "¬"+liter;
         }
-        else{
+        else{   // liter[0] = "¬";
             return liter.substring(1);
         }
     }

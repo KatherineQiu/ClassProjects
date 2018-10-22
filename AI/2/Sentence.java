@@ -1,3 +1,9 @@
+/*
+ * Project 2: Automated Reasoning
+ * @author Ziyi Kou, Ziqiu Wu
+ * @update 2018-10-21
+ */
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,7 +13,7 @@ public class Sentence {
     private String value;
 
     public Sentence(String value) {
-        this.value = PreProcess(value);
+        this.value = preProcess(value);
     }
 
     public String getValue() {
@@ -19,7 +25,7 @@ public class Sentence {
     }
 
     public Set<String> getSymbols(){
-        //ziqiu: return all symbol with name
+        // extract all symbols from a sentence, with their name
         Set<String> letters=new HashSet<String>();
 
         for(int i=0;i<this.value.length();i++){
@@ -32,9 +38,9 @@ public class Sentence {
         return letters;
     }
 
-    private String PreProcess(String value){
+    private String preProcess(String value){
+    	// remove all the spaces in the string
         value=value.replaceAll(" ","");
-
         return value;
     }
 

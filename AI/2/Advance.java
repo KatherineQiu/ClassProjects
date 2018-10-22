@@ -1,10 +1,18 @@
+/*
+ * Project 2: Automated Reasoning
+ * @author Ziyi Kou, Ziqiu Wu
+ * @update 2018-10-21
+ */
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 public class Advance {
+    // A simple resolution algorithm for propositional logic.
     public static boolean PL_Resolution(Set<Clause> kb, Clause alpha){
+        // the set of clauses of knowledge base and Not query
         Set<Clause> clauses=new HashSet<Clause>();
         for(Clause clause:kb){
             clauses.add(clause);
@@ -27,10 +35,12 @@ public class Advance {
 //                    Clause x2=clauseList.get(j);
                     resolvents=clauseList.get(i).intersect(clauseList.get(j));
                     if(resolvents==null){
+                        //
                         continue;
                     }
 //                    System.out.println(x1.getValue()+" + "+x2.getValue()+" -> "+resolvents.getValue());
                     if(resolvents.getValue().equals("")){
+                        // resolvents contains empty clause
                         return true;
                     }
                     newClause.add(resolvents);
@@ -70,15 +80,19 @@ public class Advance {
     }
 
     public static void main(String[] args) {
+        // run sample problems using a resolution-based theorem prover
         System.out.println("---------------------1-----------------------");
+        // 1.Modus Ponens
         Set<Clause> kb = new HashSet<Clause>();
         kb.add(new Clause("P"));
         kb.add(new Clause("¬P∨Q"));
 
-
         System.out.println("Q:Q------"+PL_Resolution(kb,new Clause("¬Q")));
 
         System.out.println("---------------------2-----------------------");
+        // 2.Wumpus World
+        // A represents P1,1; B represents B1,1; C represents P1,2; D represents P2,1;
+        // E represents B2,1; F represents P2,2; G represents P3,1
         Set<Clause> kb2 = new HashSet<Clause>();
         kb2.add(new Clause("¬A"));
         kb2.add(new Clause("¬B∨C∨D"));
@@ -94,6 +108,9 @@ public class Advance {
         System.out.println("Q:C------"+PL_Resolution(kb2, new Clause("¬C")));
 
         System.out.println("---------------------3-----------------------");
+        // 3.Horn Clauses
+        // P represents mythical; Q represents immortal; R represents mammal;
+        // S represents horned; T represents magical
         Set<Clause> kb3 = new HashSet<Clause>();
         kb3.add(new Clause("¬P∨Q"));
         kb3.add(new Clause("P∨¬Q"));
@@ -107,6 +124,9 @@ public class Advance {
         System.out.println("Q:S------"+PL_Resolution(kb3, new Clause("¬S")));
 
         System.out.println("---------------------4-----------------------");
+        // 4.Liars and Truth-tellers (a)
+        // A represents Amy; B represents Bob; C represents Cal
+        // Each name variable X here means that "X is truth-teller"
         Set<Clause> kb4_1 = new HashSet<Clause>();
         kb4_1.add(new Clause("¬A∨C"));
         kb4_1.add(new Clause("¬B∨¬C"));
@@ -115,6 +135,12 @@ public class Advance {
         kb4_1.add(new Clause("¬B∨C"));
         kb4_1.add(new Clause("A∨C"));
 
+        System.out.println("---------------------(a)-----------------------");
+        System.out.println("Q:A------"+PL_Resolution(kb4_1, new Clause("¬A")));
+        System.out.println("Q:B------"+PL_Resolution(kb4_1, new Clause("¬B")));
+        System.out.println("Q:C------"+PL_Resolution(kb4_1, new Clause("¬C")));
+
+        // 4.Liars and Truth-tellers (b)
         Set<Clause> kb4_2 = new HashSet<Clause>();
         kb4_2.add(new Clause("¬A∨¬C"));
         kb4_2.add(new Clause("C∨A"));
@@ -122,17 +148,14 @@ public class Advance {
         kb4_2.add(new Clause("¬B∨C"));
         kb4_2.add(new Clause("¬C∨B"));
 
-        System.out.println("---------------------(a)-----------------------");
-        System.out.println("Q:A------"+PL_Resolution(kb4_1, new Clause("¬A")));
-        System.out.println("Q:B------"+PL_Resolution(kb4_1, new Clause("¬B")));
-        System.out.println("Q:C------"+PL_Resolution(kb4_1, new Clause("¬C")));
-
         System.out.println("---------------------(b)-----------------------");
         System.out.println("Q:A------"+PL_Resolution(kb4_2, new Clause("¬A")));
         System.out.println("Q:B------"+PL_Resolution(kb4_2, new Clause("¬B")));
         System.out.println("Q:C------"+PL_Resolution(kb4_2, new Clause("¬C")));
 
         System.out.println("---------------------5-----------------------");
+        // 5.More Liars and Truth-tellers
+        // each symbol represents the person who has the name of the same first letter
         Set<Clause> kb5 = new HashSet<Clause>();
         kb5.add(new Clause("¬A∨H"));
         kb5.add(new Clause("¬A∨I"));
@@ -176,6 +199,9 @@ public class Advance {
         }
 
         System.out.println("---------------------6-----------------------");
+        // 6.The Doors of Enlightenment (a)
+        // For each x in A, B, C, D, E, F, G, and H we assume x means "x is a knight" and ¬x means "x is a knave"
+        // For each x in X Y Z W we assume x means "x is a good door" and ¬x means "x is a bad door"
         Set<Clause> kb6_1 = new HashSet<Clause>();
         kb6_1.add(new Clause("X∨Y∨Z∨W"));
         kb6_1.add(new Clause("¬A∨X"));
@@ -204,7 +230,13 @@ public class Advance {
         kb6_1.add(new Clause("H"));
         kb6_1.add(new Clause("¬A∨H"));
 
+        System.out.println("---------------------(a)-----------------------");
+        System.out.println("Q:X------"+PL_Resolution(kb6_1, new Clause("¬X")));
+        System.out.println("Q:Y------"+PL_Resolution(kb6_1, new Clause("¬Y")));
+        System.out.println("Q:Z------"+PL_Resolution(kb6_1, new Clause("¬Z")));
+        System.out.println("Q:W------"+PL_Resolution(kb6_1, new Clause("¬W")));
 
+        // 6.The Doors of Enlightenment (b)
         Set<Clause> kb6_2 = new HashSet<Clause>();
         kb6_2.add(new Clause("X∨Y∨Z∨W"));
         kb6_2.add(new Clause("¬A∨X"));
@@ -216,12 +248,6 @@ public class Advance {
         kb6_2.add(new Clause("G∨H"));
         kb6_2.add(new Clause("H"));
         kb6_2.add(new Clause("¬A∨H"));
-
-        System.out.println("---------------------(a)-----------------------");
-        System.out.println("Q:X------"+PL_Resolution(kb6_1, new Clause("¬X")));
-        System.out.println("Q:Y------"+PL_Resolution(kb6_1, new Clause("¬Y")));
-        System.out.println("Q:Z------"+PL_Resolution(kb6_1, new Clause("¬Z")));
-        System.out.println("Q:W------"+PL_Resolution(kb6_1, new Clause("¬W")));
 
         System.out.println("---------------------(b)-----------------------");
         System.out.println("Q:X------"+PL_Resolution(kb6_2, new Clause("¬X")));
