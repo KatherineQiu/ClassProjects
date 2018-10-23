@@ -123,9 +123,9 @@ public class Clause {
                 fore.remove(delete);
                 back.remove(Not(delete));
             }
-            if(fore.size()+back.size()>fore_size && fore.size()+back.size()>back_size){
-                return null;
-            }
+//            if(fore_size>1 && back_size>1 && fore.size()+back.size()>1){
+//                return null;
+//            }
             back.addAll(fore);
             if(back.size()==0){
                 return new Clause("");
@@ -135,6 +135,9 @@ public class Clause {
             }
 
             else{
+                if(fore_size>1 && back_size>1){
+                    return null;
+                }
                 return new Clause(resort(String.join("∨",back)));
             }
         }

@@ -42,9 +42,9 @@ public class Advance {
                         // resolvents contains empty clause
                         return true;
                     }
-                    if(x1.getValue().contains("∨") && x2.getValue().contains("∨") && resolvents.getValue().contains("∨")){
-                        continue;
-                    }
+//                    if(x1.getValue().contains("∨") && x2.getValue().contains("∨") && resolvents.getValue().contains("∨")){
+//                        continue;
+//                    }
                     newClause.add(resolvents);
                 }
             }
