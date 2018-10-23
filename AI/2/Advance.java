@@ -31,17 +31,19 @@ public class Advance {
 //            System.out.println("kb size:"+clauseList.size()+"new size:"+newClause.size());
             for(int i=0;i<clauseList.size();i++){
                 for(int j=i+1;j<clauseList.size();j++){
-//                    Clause x1=clauseList.get(i);
-//                    Clause x2=clauseList.get(j);
+                    Clause x1=clauseList.get(i);
+                    Clause x2=clauseList.get(j);
                     resolvents=clauseList.get(i).intersect(clauseList.get(j));
                     if(resolvents==null){
-                        //
                         continue;
                     }
 //                    System.out.println(x1.getValue()+" + "+x2.getValue()+" -> "+resolvents.getValue());
                     if(resolvents.getValue().equals("")){
                         // resolvents contains empty clause
                         return true;
+                    }
+                    if(x1.getValue().contains("∨") && x2.getValue().contains("∨") && resolvents.getValue().contains("∨")){
+                        continue;
                     }
                     newClause.add(resolvents);
                 }
