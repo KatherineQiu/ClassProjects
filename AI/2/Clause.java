@@ -4,7 +4,10 @@
  * @update 2018-10-21
  */
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class Clause {
@@ -45,6 +48,36 @@ public class Clause {
         }
 
         return String.join("∨",strArr);
+    }
+
+    private int belongTo(Clause c2){
+        Set<String> set1=null;
+        Set<String> set2=null;
+        if(this.value.contains("∨")){
+            set1=new HashSet<String>(Arrays.asList(this.value.split("∨")));
+        }
+        else {
+            set1=new HashSet<String>();
+            set1.add(this.value);
+        }
+
+        if(c2.getValue().contains("∨")){
+            set2=new HashSet<String>(Arrays.asList(c2.getValue().split("∨")));
+        }
+        else {
+            set2=new HashSet<String>();
+            set2.add(c2.getValue());
+        }
+
+        if(set1.containsAll(set2)){
+            return 1;
+        }
+        else if(set2.containsAll(set1)){
+            return -1;
+        }
+        else {
+            return 0;
+        }
     }
 
     public Clause intersect(Clause c2){
@@ -90,9 +123,9 @@ public class Clause {
                 fore.remove(delete);
                 back.remove(Not(delete));
             }
-            if(fore.size()+back.size()>fore_size && fore.size()+back.size()>back_size){
-                return null;
-            }
+//            if(fore_size>1 && back_size>1 && fore.size()+back.size()>1){
+//                return null;
+//            }
             back.addAll(fore);
             if(back.size()==0){
                 return new Clause("");
@@ -102,6 +135,9 @@ public class Clause {
             }
 
             else{
+                if(fore_size>1 && back_size>1){
+                    return null;
+                }
                 return new Clause(resort(String.join("∨",back)));
             }
         }
@@ -123,6 +159,8 @@ public class Clause {
     //test
     public static void main(String[] args) {
 //        Clause test=new Clause(new Sentence("C⇔(B⇔A∧C)"));
-        Clause clause1=new Clause("¬B");
+        String x="1,2,3";
+        String[] xx=x.split(".");
+        System.out.println("1,2,3".split("."));
     }
 }

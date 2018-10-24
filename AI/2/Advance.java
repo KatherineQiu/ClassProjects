@@ -31,11 +31,10 @@ public class Advance {
 //            System.out.println("kb size:"+clauseList.size()+"new size:"+newClause.size());
             for(int i=0;i<clauseList.size();i++){
                 for(int j=i+1;j<clauseList.size();j++){
-//                    Clause x1=clauseList.get(i);
-//                    Clause x2=clauseList.get(j);
+                    Clause x1=clauseList.get(i);
+                    Clause x2=clauseList.get(j);
                     resolvents=clauseList.get(i).intersect(clauseList.get(j));
                     if(resolvents==null){
-                        //
                         continue;
                     }
 //                    System.out.println(x1.getValue()+" + "+x2.getValue()+" -> "+resolvents.getValue());
@@ -43,6 +42,9 @@ public class Advance {
                         // resolvents contains empty clause
                         return true;
                     }
+//                    if(x1.getValue().contains("∨") && x2.getValue().contains("∨") && resolvents.getValue().contains("∨")){
+//                        continue;
+//                    }
                     newClause.add(resolvents);
                 }
             }
@@ -60,17 +62,6 @@ public class Advance {
                 return false;
             }
 
-//            int maxLength=0;
-//            for(String s:stringClauseSet){
-//                if(s.split("∨").length>maxLength){
-//                    maxLength=s.split("∨").length;
-//                }
-//            }
-//            for(String s:stringNewSet){
-//                if(s.split("∨").length<=maxLength){
-//                    stringClauseSet.add(s);
-//                }
-//            }
             stringClauseSet.addAll(stringNewSet);
             clauseList=new LinkedList<Clause>();
             for(String s:stringClauseSet){
@@ -79,20 +70,51 @@ public class Advance {
         }
     }
 
+    public static String test_both_side(Set<Clause> kb,Clause alpha){
+        if(PL_Resolution(kb,alpha)==true){
+            return "true";
+        }
+        else {
+            if(PL_Resolution(kb,new Clause(alpha.getValue().substring(1)))==true){
+                return "false";
+            }
+            else {
+                return "not sure";
+            }
+        }
+    }
+
+    public static void print_kb(Set<Clause> kb){
+        for(Clause clause:kb){
+            System.out.println(clause.getValue());
+        }
+    }
+
     public static void main(String[] args) {
         // run sample problems using a resolution-based theorem prover
-        System.out.println("---------------------1-----------------------");
-        // 1.Modus Ponens
+        System.out.println("---------------------1:Modus Ponens-----------------------");
+        System.out.println("-----letter mapping:same");
+
+        System.out.println("-----kb:");
         Set<Clause> kb = new HashSet<Clause>();
         kb.add(new Clause("P"));
         kb.add(new Clause("¬P∨Q"));
+        print_kb(kb);
 
-        System.out.println("Q:Q------"+PL_Resolution(kb,new Clause("¬Q")));
+        System.out.println("-----query:");
+        System.out.println("Q:"+test_both_side(kb,new Clause("¬Q")));
 
-        System.out.println("---------------------2-----------------------");
-        // 2.Wumpus World
-        // A represents P1,1; B represents B1,1; C represents P1,2; D represents P2,1;
-        // E represents B2,1; F represents P2,2; G represents P3,1
+        System.out.println("---------------------2:Wumpus World-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("A -> P1,1");
+        System.out.println("B -> B1,1");
+        System.out.println("C -> P1,2");
+        System.out.println("D -> P2,1");
+        System.out.println("E -> B2,1");
+        System.out.println("F -> P2,2");
+        System.out.println("G -> P3,1");
+
+        System.out.println("-----kb:");
         Set<Clause> kb2 = new HashSet<Clause>();
         kb2.add(new Clause("¬A"));
         kb2.add(new Clause("¬B∨C∨D"));
@@ -104,13 +126,20 @@ public class Advance {
         kb2.add(new Clause("E∨¬G"));
         kb2.add(new Clause("¬B"));
         kb2.add(new Clause("E"));
+        print_kb(kb2);
 
-        System.out.println("Q:C------"+PL_Resolution(kb2, new Clause("¬C")));
+        System.out.println("-----query:");
+        System.out.println("C:"+test_both_side(kb2, new Clause("¬C")));
 
-        System.out.println("---------------------3-----------------------");
-        // 3.Horn Clauses
-        // P represents mythical; Q represents immortal; R represents mammal;
-        // S represents horned; T represents magical
+        System.out.println("---------------------3:Horn Clauses-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("P -> mythical");
+        System.out.println("Q -> immortal");
+        System.out.println("R -> mammal");
+        System.out.println("S -> horned");
+        System.out.println("T -> magical");
+
+        System.out.println("-----kb:");
         Set<Clause> kb3 = new HashSet<Clause>();
         kb3.add(new Clause("¬P∨Q"));
         kb3.add(new Clause("P∨¬Q"));
@@ -118,15 +147,22 @@ public class Advance {
         kb3.add(new Clause("¬Q∨S"));
         kb3.add(new Clause("¬R∨S"));
         kb3.add(new Clause("¬S∨T"));
+        print_kb(kb3);
 
-        System.out.println("Q:P------"+PL_Resolution(kb3, new Clause("¬P")));
-        System.out.println("Q:T------"+PL_Resolution(kb3, new Clause("¬T")));
-        System.out.println("Q:S------"+PL_Resolution(kb3, new Clause("¬S")));
+        System.out.println("-----query:");
+        System.out.println("P:"+test_both_side(kb3, new Clause("¬P")));
+        System.out.println("T:"+test_both_side(kb3, new Clause("¬T")));
+        System.out.println("S:"+test_both_side(kb3, new Clause("¬S")));
 
-        System.out.println("---------------------4-----------------------");
-        // 4.Liars and Truth-tellers (a)
-        // A represents Amy; B represents Bob; C represents Cal
-        // Each name variable X here means that "X is truth-teller"
+        System.out.println("---------------------4:Liars and Truth-tellers-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("A -> Amy");
+        System.out.println("B -> Bob");
+        System.out.println("C -> Cal");
+        System.out.println("Each name variable X here means that \"X is truth-teller\"");
+
+        System.out.println("(a)");
+        System.out.println("-----kb:");
         Set<Clause> kb4_1 = new HashSet<Clause>();
         kb4_1.add(new Clause("¬A∨C"));
         kb4_1.add(new Clause("¬B∨¬C"));
@@ -134,28 +170,33 @@ public class Advance {
         kb4_1.add(new Clause("¬C∨B∨¬A"));
         kb4_1.add(new Clause("¬B∨C"));
         kb4_1.add(new Clause("A∨C"));
+        print_kb(kb4_1);
 
-        System.out.println("---------------------(a)-----------------------");
-        System.out.println("Q:A------"+PL_Resolution(kb4_1, new Clause("¬A")));
-        System.out.println("Q:B------"+PL_Resolution(kb4_1, new Clause("¬B")));
-        System.out.println("Q:C------"+PL_Resolution(kb4_1, new Clause("¬C")));
+        System.out.println("-----query:");
+        System.out.println("A:"+test_both_side(kb4_1, new Clause("¬A")));
+        System.out.println("B:"+test_both_side(kb4_1, new Clause("¬B")));
+        System.out.println("C:"+test_both_side(kb4_1, new Clause("¬C")));
 
         // 4.Liars and Truth-tellers (b)
+        System.out.println("(b)");
+        System.out.println("-----kb:");
         Set<Clause> kb4_2 = new HashSet<Clause>();
         kb4_2.add(new Clause("¬A∨¬C"));
         kb4_2.add(new Clause("C∨A"));
         kb4_2.add(new Clause("¬B∨A"));
         kb4_2.add(new Clause("¬B∨C"));
         kb4_2.add(new Clause("¬C∨B"));
+        print_kb(kb4_2);
 
-        System.out.println("---------------------(b)-----------------------");
-        System.out.println("Q:A------"+PL_Resolution(kb4_2, new Clause("¬A")));
-        System.out.println("Q:B------"+PL_Resolution(kb4_2, new Clause("¬B")));
-        System.out.println("Q:C------"+PL_Resolution(kb4_2, new Clause("¬C")));
+        System.out.println("A:"+test_both_side(kb4_2, new Clause("¬A")));
+        System.out.println("B:"+test_both_side(kb4_2, new Clause("¬B")));
+        System.out.println("C:"+test_both_side(kb4_2, new Clause("¬C")));
 
-        System.out.println("---------------------5-----------------------");
-        // 5.More Liars and Truth-tellers
-        // each symbol represents the person who has the name of the same first letter
+        System.out.println("---------------------5:More Liars and Truth-tellers-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("each symbol represents the person who has the name of the same first letter");
+
+        System.out.println("-----kb:");
         Set<Clause> kb5 = new HashSet<Clause>();
         kb5.add(new Clause("¬A∨H"));
         kb5.add(new Clause("¬A∨I"));
@@ -193,15 +234,20 @@ public class Advance {
         kb5.add(new Clause("¬L∨¬B"));
         kb5.add(new Clause("¬L∨¬J"));
         kb5.add(new Clause("B∨J∨L"));
+        print_kb(kb5);
 
+        System.out.println("-----query:");
         for(int i=65;i<=76;i++){
-            System.out.println("Q:"+String.valueOf((char)i)+"------"+PL_Resolution(kb5, new Clause("¬"+String.valueOf((char)i))));
+            System.out.println(String.valueOf((char)i)+":"+test_both_side(kb5, new Clause("¬"+String.valueOf((char)i))));
         }
 
-        System.out.println("---------------------6-----------------------");
-        // 6.The Doors of Enlightenment (a)
-        // For each x in A, B, C, D, E, F, G, and H we assume x means "x is a knight" and ¬x means "x is a knave"
-        // For each x in X Y Z W we assume x means "x is a good door" and ¬x means "x is a bad door"
+        System.out.println("---------------------6:The Doors of Enlightenment-----------------------");
+        System.out.println("-----letter mapping:");
+        System.out.println("For each x in A, B, C, D, E, F, G, and H we assume x means \"x is a knight\" and ¬x means \"x is a knave\"");
+        System.out.println("For each x in X Y Z W we assume x means \"x is a good door\" and ¬x means \"x is a bad door\"");
+
+        System.out.println("(a)");
+        System.out.println("-----kb:");
         Set<Clause> kb6_1 = new HashSet<Clause>();
         kb6_1.add(new Clause("X∨Y∨Z∨W"));
         kb6_1.add(new Clause("¬A∨X"));
@@ -229,14 +275,17 @@ public class Advance {
         kb6_1.add(new Clause("G∨H"));
         kb6_1.add(new Clause("H"));
         kb6_1.add(new Clause("¬A∨H"));
+        print_kb(kb6_1);
 
-        System.out.println("---------------------(a)-----------------------");
-        System.out.println("Q:X------"+PL_Resolution(kb6_1, new Clause("¬X")));
-        System.out.println("Q:Y------"+PL_Resolution(kb6_1, new Clause("¬Y")));
-        System.out.println("Q:Z------"+PL_Resolution(kb6_1, new Clause("¬Z")));
-        System.out.println("Q:W------"+PL_Resolution(kb6_1, new Clause("¬W")));
+        System.out.println("-----query:");
+        System.out.println("X:"+test_both_side(kb6_1, new Clause("¬X")));
+        System.out.println("Y:"+test_both_side(kb6_1, new Clause("¬Y")));
+        System.out.println("Z:"+test_both_side(kb6_1, new Clause("¬Z")));
+        System.out.println("W:"+test_both_side(kb6_1, new Clause("¬W")));
 
         // 6.The Doors of Enlightenment (b)
+        System.out.println("(b)");
+        System.out.println("-----kb:");
         Set<Clause> kb6_2 = new HashSet<Clause>();
         kb6_2.add(new Clause("X∨Y∨Z∨W"));
         kb6_2.add(new Clause("¬A∨X"));
@@ -248,12 +297,13 @@ public class Advance {
         kb6_2.add(new Clause("G∨H"));
         kb6_2.add(new Clause("H"));
         kb6_2.add(new Clause("¬A∨H"));
+        print_kb(kb6_2);
 
-        System.out.println("---------------------(b)-----------------------");
-        System.out.println("Q:X------"+PL_Resolution(kb6_2, new Clause("¬X")));
-        System.out.println("Q:Y------"+PL_Resolution(kb6_2, new Clause("¬Y")));
-        System.out.println("Q:Z------"+PL_Resolution(kb6_2, new Clause("¬Z")));
-        System.out.println("Q:W------"+PL_Resolution(kb6_2, new Clause("¬W")));
+        System.out.println("-----query:");
+        System.out.println("X:"+test_both_side(kb6_2, new Clause("¬X")));
+        System.out.println("Y:"+test_both_side(kb6_2, new Clause("¬Y")));
+        System.out.println("Z:"+test_both_side(kb6_2, new Clause("¬Z")));
+        System.out.println("W:"+test_both_side(kb6_2, new Clause("¬W")));
 
     }
 }
