@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class Basic {
 	
-	//  A truth-table enumeration algorithm for deciding propositional entailment.//12342234
+	//  A truth-table enumeration algorithm for deciding propositional entailment.
     public static boolean tt_entails(Set<Sentence> kb, Sentence alpha) {
         Set<String> set = new HashSet<String>();
         for (Sentence s : kb) {
