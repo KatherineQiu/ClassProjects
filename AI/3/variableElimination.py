@@ -79,11 +79,6 @@ def parser(file_name):
                                                 if r == 3:
                                                     values.update({(False, False): p})
 
-                     #           bn.update({var: val})
-
-# 'J': [['A'],  {(F,): .05, (T,): .90}]
-
-    vars = vars[::-1]   # inverted order, otherwise error - no parents in e
     return bn, vars
 
 
