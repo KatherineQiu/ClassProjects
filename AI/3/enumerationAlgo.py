@@ -1,21 +1,25 @@
 # The enumeration algorithm for answering queries on Bayesian networks, without speedups.
 import sys
+import argparse
 import xml.etree.ElementTree as ET
+import matplotlib.pyplot as plt
+import time
 
 
 def formatInput(inputArgv):
     '''format the command line arguments which invoke the program, such as:
     python enumerationAlgo.py aima-alarm.xml B M true J true'''
-    X = inputArgv[3]
+    X = inputArgv[1]
     e = {}
 
     for i in range(0, len(inputArgv)):
         if inputArgv[i] == 'true':
-        #if inputArgv[i].upper == 'TRUE':
-            e.update({inputArgv[i-1]:True})
+            # if inputArgv[i].upper == 'TRUE':
+            e.update({inputArgv[i - 1]: True})
         elif inputArgv[i] == 'false':
             e.update({inputArgv[i - 1]: False})
     return X, e
+
 
 def parser(file_name):
     '''parse .xml file - extract variables, CPT...'''
@@ -32,8 +36,7 @@ def parser(file_name):
         if root.tag != 'NETWORK':
             print 'The file misses a NETWORK tag.'
         else:
-            for i in range(1, len(root)):   # skip the network name
-
+            for i in range(1, len(root)):  # skip the network name
 
                 if root[i].tag == 'VARIABLE':
                     # assumption: all variables have Boolean value
@@ -61,7 +64,7 @@ def parser(file_name):
                                         bn.update({var: val})
 
                                     elif root[i][g].tag == 'TABLE':
-                                        prob = root[i][g].text.strip().split('\n\t')
+                                        prob = [x.strip() for x in root[i][g].text.strip().split('\n')]
                                         for r in range(0, len(prob)):
                                             p = float(prob[r].strip().split(' ')[0])
                                             if len(prob) == 2:
@@ -80,11 +83,9 @@ def parser(file_name):
                                                 if r == 3:
                                                     values.update({(False, False): p})
 
-                     #           bn.update({var: val})
+    # 'J': [['A'],  {(F,): .05, (T,): .90}]
 
-# 'J': [['A'],  {(F,): .05, (T,): .90}]
-
-    vars = vars[::-1]   # inverted order, otherwise error - no parents in e
+    vars = vars[::-1]  # inverted order, otherwise error - no parents in e
     return bn, vars
 
 
@@ -96,6 +97,7 @@ def normalize(QX):
     for key in QX.keys():
         QX[key] /= sum
     return QX
+
 
 def conditionalPro(var, val, e, bn):
     '''get conditional probability'''
@@ -117,12 +119,13 @@ def enumerationAsk(X, e, bn, vars):
     X: the query variable
     e: observed values for variables E
     bn: a Bayes net with variables'''
-    QX = {}   # a distribution over X, initially empty
+    QX = {}  # a distribution over X, initially empty
     for xi in [False, True]:
-        e[X] = xi   # e extended with X=xi
+        e[X] = xi  # e extended with X=xi
         QX[xi] = enumerateAll(vars, e, bn)
         del e[X]
-    return normalize(QX)    # a distribution over X
+    return normalize(QX)  # a distribution over X
+
 
 def enumerateAll(vars, e, bn):
     if len(vars) == 0:
@@ -134,7 +137,7 @@ def enumerateAll(vars, e, bn):
         val = P * enumerateAll(vars, e, bn)
         vars.append(Y)
         return val  # a real number
-    else:   # sum of T&F
+    else:  # sum of T&F
         sum = 0
         e[Y] = True
         sum += conditionalPro(Y, True, e, bn) * enumerateAll(vars, e, bn)
@@ -144,16 +147,23 @@ def enumerateAll(vars, e, bn):
         vars.append(Y)
         return sum  # a real number
 
+
 if __name__ == '__main__':
     # get the problem into the program
     # argv = 'python enumerationAlgo.py aima-alarm.xml B M true J true'
-    argv = 'python enumerationAlgo.py aima-wet-grass.xml R S true'
+    # argv = 'python enumerationAlgo.py aima-wet-grass.xml R S true'
     # argv = raw_input('input the program invoking command, such as "python enumerationAlgo.py aima-alarm.xml B M true J true"')
-    info = argv.split(' ')
-    X, e = formatInput(info)
+    time1=time.time()
+    pars = argparse.ArgumentParser()
+    pars.add_argument('paras', type=str,nargs='*')
+    args = pars.parse_args()
+    print(args.paras)
+
+    X, e = formatInput(args.paras)
     print X, e
-    bn, vars = parser(info[2])
+    bn, vars = parser(args.paras[0])
     print bn, vars
     # X, e = formatInput(sys.argv)  # one-word character
     # bn, vars = parser(sys.argv[2])
     print enumerationAsk(X, e, bn, vars)
+    print(time.time()-time1)
