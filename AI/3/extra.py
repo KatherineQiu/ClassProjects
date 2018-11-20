@@ -257,7 +257,6 @@ def norm_final_result(final_result):
     final_result[0][-1] = final_result[0][-1] / total
     final_result[1][-1] = final_result[1][-1] / total
 
-
 def elimination_ask(X, e, bn, vars):
     factors = []
 
