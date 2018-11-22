@@ -1,5 +1,6 @@
 # The enumeration algorithm for answering queries on Bayesian networks, without speedups.
 import sys
+import os
 import argparse
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
@@ -153,6 +154,8 @@ if __name__ == '__main__':
     # argv = 'python enumerationAlgo.py aima-alarm.xml B M true J true'
     # argv = 'python enumerationAlgo.py aima-wet-grass.xml R S true'
     # argv = raw_input('input the program invoking command, such as "python enumerationAlgo.py aima-alarm.xml B M true J true"')
+    print(os.path.exists('aima-wet-grass.xml'))
+
     time1=time.time()
     pars = argparse.ArgumentParser()
     pars.add_argument('paras', type=str,nargs='*')

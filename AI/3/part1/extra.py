@@ -1,9 +1,11 @@
 # The enumeration algorithm for answering queries on Bayesian networks, without speedups.
 import sys
+
 import argparse
 import xml.etree.ElementTree as ET
 import copy
 import time
+import os
 
 storage_keys = {}
 
@@ -166,10 +168,6 @@ def make_factor(var, e, bn):
 def point_wise(result, factor):
     if result == None:
         return factor
-    elif set(result[0]) | set(factor[0]) == set(result[0]):
-        return result
-    elif set(factor[0]) | set(result[0]) == set(factor[0]):
-        return factor
     else:
         new_tables = []
         new_tables.append(result[0] + factor[0])
@@ -215,6 +213,20 @@ def point_wise(result, factor):
         return reduced_table
 
 
+def get_final_result(var, factors):
+    result = None
+
+    if len(factors) > 1:
+        for index, factor in enumerate(factors):
+            if var in factor[0]:
+                result = point_wise(result, factor)
+
+    else:
+        result = factors[0]
+
+    return result
+
+
 def sum_out(var, factors):
     result = None
 
@@ -253,9 +265,10 @@ def sum_out(var, factors):
 
 
 def norm_final_result(final_result):
-    total = final_result[0][-1] + final_result[1][-1]
-    final_result[0][-1] = final_result[0][-1] / total
+    total = final_result[1][-1] + final_result[2][-1]
     final_result[1][-1] = final_result[1][-1] / total
+    final_result[2][-1] = final_result[2][-1] / total
+
 
 def elimination_ask(X, e, bn, vars):
     factors = []
@@ -275,15 +288,11 @@ def elimination_ask(X, e, bn, vars):
 
         factors = valid_factors
 
-    factor = factors[0]
-    index_X = factor[0].index(X)
-    final_result = []
-    for val in factor[1:]:
-        final_result.append([val[index_X], val[-1]])
+    final_result = get_final_result(X, factors)
 
     norm_final_result(final_result)
 
-    return final_result
+    return {final_result[1][final_result[0].index(X)]:final_result[1][-1],final_result[2][final_result[0].index(X)]:final_result[2][-1]}
 
 
 if __name__ == '__main__':
@@ -291,6 +300,7 @@ if __name__ == '__main__':
     # argv = 'python enumerationAlgo.py aima-alarm.xml B M true J true'
     # argv = 'python enumerationAlgo.py aima-wet-grass.xml R S true'
     # argv = raw_input('input the program invoking command, such as "python enumerationAlgo.py aima-alarm.xml B M true J true"')
+
     time1 = time.time()
     pars = argparse.ArgumentParser()
     pars.add_argument('paras', type=str, nargs='*')
