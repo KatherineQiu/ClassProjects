@@ -93,7 +93,7 @@ def get_all_related_node(target, bn):
     children = []
     sibling = []
     for key in bn.keys():
-        if target in bn[key][0]:
+        if bn[key][0] is not None and target in bn[key][0]:
             children.extend(key)
 
     for child in children:
@@ -103,7 +103,9 @@ def get_all_related_node(target, bn):
     all_nodes.extend(sibling)
 
     final = list(set(all_nodes))
-    final.remove(target)
+
+    if target in final:
+        final.remove(target)
     return final
 
 

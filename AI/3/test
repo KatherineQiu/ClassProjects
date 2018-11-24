@@ -1,0 +1,28 @@
+xml:
+	aima-wet-grass.xml
+algo:
+	eliminationAlgo.py
+	query:
+		C
+		W
+		S R true W true
+		R S true W false C true
+	answer:
+		{True: 0.5, False: 0.5}
+		{True: 0.6471, False: 0.3529}
+		{True: 0.1944990176817289, False: 0.8055009823182712}
+		{True: 0.285714285714286, False: 0.714285714285714}
+algo:
+	gibbsSampling.py
+	Number:
+		10000
+	query:
+		C
+		W
+		S R true W true
+		R S true W false C true
+	answer:
+		{True: 0.4917, False: 0.5083}
+		{True: 0.6688, False: 0.33120000000000005}
+		{True: 0.195, False: 0.8049999999999999}
+		{True: 0.2816, False: 0.7183999999999999}
