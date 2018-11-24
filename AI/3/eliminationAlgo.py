@@ -128,9 +128,9 @@ def make_factor(var, e, bn):
         sorted_zip = sorted(zip_val, key=lambda pair: key_pros[0].index(pair[0]))
 
         if var_bool:
-            return key_pros[1][zip(*sorted_zip)[1]]
+            return key_pros[1][tuple([item[1] for item in sorted_zip])]
         else:
-            return 1 - key_pros[1][zip(*sorted_zip)[1]]
+            return 1 - key_pros[1][tuple([item[1] for item in sorted_zip])]
 
     parents = bn[var][0]
 
@@ -309,5 +309,5 @@ if __name__ == '__main__':
 
     bn, vars = parser(args.paras[0])
 
-    print('Result: '+str(elimination_ask(X, e, bn, vars)))
-    print('Time used:'+str(time.time() - time1))
+    print('Result: ' + str(elimination_ask(X, e, bn, vars)))
+    print('Time used:' + str(time.time() - time1))
