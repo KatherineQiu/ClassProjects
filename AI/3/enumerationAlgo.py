@@ -1,21 +1,26 @@
-# The rejection-sampling algorithm for answering queries given evidence in a Bayesian network.
-import random
+# The enumeration algorithm for answering queries on Bayesian networks, without speedups.
+import sys
+import os
+import argparse
 import xml.etree.ElementTree as ET
+import matplotlib.pyplot as plt
+import time
+
 
 def formatInput(inputArgv):
     '''format the command line arguments which invoke the program, such as:
-    python enumerationAlgo.py 1000 aima-alarm.xml B M true J true'''
-    N = inputArgv[2]
-    X = inputArgv[4]
+    python enumerationAlgo.py aima-alarm.xml B M true J true'''
+    X = inputArgv[1]
     e = {}
 
     for i in range(0, len(inputArgv)):
         if inputArgv[i] == 'true':
-        #if inputArgv[i].upper == 'TRUE':
-            e.update({inputArgv[i-1]:True})
+            # if inputArgv[i].upper == 'TRUE':
+            e.update({inputArgv[i - 1]: True})
         elif inputArgv[i] == 'false':
             e.update({inputArgv[i - 1]: False})
-    return N, X, e
+    return X, e
+
 
 def parser(file_name):
     '''parse .xml file - extract variables, CPT...'''
@@ -26,14 +31,13 @@ def parser(file_name):
     vars = []
 
     if root.tag != 'BIF':
-        print 'Only the semi-standard XMLBIF representation can be processed.'
+        print('Only the semi-standard XMLBIF representation can be processed.')
     else:
         root = root[0]
         if root.tag != 'NETWORK':
-            print 'The file misses a NETWORK tag.'
+            print('The file misses a NETWORK tag.')
         else:
-            for i in range(1, len(root)):   # skip the network name
-
+            for i in range(1, len(root)):  # skip the network name
 
                 if root[i].tag == 'VARIABLE':
                     # assumption: all variables have Boolean value
@@ -61,7 +65,7 @@ def parser(file_name):
                                         bn.update({var: val})
 
                                     elif root[i][g].tag == 'TABLE':
-                                        prob = root[i][g].text.strip().split('\n\t')
+                                        prob = [x.strip() for x in root[i][g].text.strip().split('\n')]
                                         for r in range(0, len(prob)):
                                             p = float(prob[r].strip().split(' ')[0])
                                             if len(prob) == 2:
@@ -80,13 +84,21 @@ def parser(file_name):
                                                 if r == 3:
                                                     values.update({(False, False): p})
 
-                     #           bn.update({var: val})
+    # 'J': [['A'],  {(F,): .05, (T,): .90}]
 
-# 'J': [['A'],  {(F,): .05, (T,): .90}]
-
-    # vars = vars[::-1]   # inverted order, otherwise error - no parents in e
-    # in prior sampling, we sample parents before children
+    vars = vars[::-1]  # inverted order, otherwise error - no parents in e
     return bn, vars
+
+
+def normalize(QX):
+    '''normalize QX so that the probabilities add up to 1'''
+    sum = 0.0
+    for value in QX.values():
+        sum += value
+    for key in QX.keys():
+        QX[key] /= sum
+    return QX
+
 
 def conditionalPro(var, val, e, bn):
     '''get conditional probability'''
@@ -102,62 +114,53 @@ def conditionalPro(var, val, e, bn):
     else:
         return 1.0 - trueP
 
-def weightedSample(bn, e):
-    '''a sampling algorithm'''
-    # vars = vars[::-1]   # first reverse variables so they are top down.
-    w = 1
-    vectorx = e.copy()    # an event with n elements initialized from e
 
-    for var in vars:
-        if var in e:
-            P = conditionalPro(var, e[var], vectorx, bn)
-            w = w * P
-        else:
-            trueP = conditionalPro(var, True, vectorx, bn)
-            ran = random.random()  # (0,1)
-            if ran <= trueP:  # a random sample from P(Xi|parents(Xi))
-                vectorx[var] = True
-            else:
-                vectorx[var] = False
-
-        # vars = vars[::-1]   # reverse variable list again so it is the same as it was before this function was called..
-    return vectorx, w  # an event and a weight
-
-def likelihoodWeighting(X, e, bn, N):
+def enumerationAsk(X, e, bn, vars):
     '''inputs:
-    X, the query variable
-    e, observed values for variables E
-    bn, a Bayesian network
-    N, the total number of samples to be generated'''
-    vectorW = {True: 0, False: 0}   # local variables, a vector of weighted counts for each value of X, initially zero
+    X: the query variable
+    e: observed values for variables E
+    bn: a Bayes net with variables'''
+    QX = {}  # a distribution over X, initially empty
+    for xi in [False, True]:
+        e[X] = xi  # e extended with X=xi
+        QX[xi] = enumerateAll(vars, e, bn)
+        del e[X]
+    return normalize(QX)  # a distribution over X
 
-    for j in range(1, int(N)+1):
-        vectorx, w = weightedSample(bn, e) # vector(x)
 
-        # if consistent(vectorx, e):
-        x = vectorx[X]  # where x is the value of X in vector(x)
-        vectorW[x] = vectorW[x] + w # count +1
-    #
-    # if vectorN[True] == 0 or vectorN[False] == 0:
-    #     print 'The total number of samples to be generated is too small!'
-    #     return None
+def enumerateAll(vars, e, bn):
+    if len(vars) == 0:
+        return 1.0
 
-    total = float(vectorW[True] + vectorW[False])
-    QX = {True: vectorW[True] / total, False: vectorW[False] / total}
+    Y = vars.pop()
+    if Y in e:
+        P = conditionalPro(Y, e[Y], e, bn)
+        val = P * enumerateAll(vars, e, bn)
+        vars.append(Y)
+        return val  # a real number
+    else:  # sum of T&F
+        sum = 0
+        e[Y] = True
+        sum += conditionalPro(Y, True, e, bn) * enumerateAll(vars, e, bn)
+        e[Y] = False
+        sum += conditionalPro(Y, False, e, bn) * enumerateAll(vars, e, bn)
+        del e[Y]
+        vars.append(Y)
+        return sum  # a real number
 
-    return QX # an estimate of P(X|e)
-    # return [QX, N]
 
 if __name__ == '__main__':
-    # get the problem into the program
-    argv = 'python enumerationAlgo.py 100000 aima-alarm.xml B M true J true'
-    # argv = 'python enumerationAlgo.py 1000 aima-wet-grass.xml R C true W true'
-    # argv = raw_input('input the program invoking command, such as "python enumerationAlgo.py 1000 aima-alarm.xml B M true J true"')
-    info = argv.split(' ')
-    N, X, e = formatInput(info)
-    print N, X, e
-    bn, vars = parser(info[3])
-    print bn, vars
-    # X, e = formatInput(sys.argv)  # one-word character
-    # bn, vars = parser(sys.argv[2])
-    print likelihoodWeighting(X, e, bn, N)
+    time1 = time.time()
+
+    pars = argparse.ArgumentParser()
+    pars.add_argument('paras', type=str, nargs='*')
+    args = pars.parse_args()
+
+    X, e = formatInput(args.paras)
+    print('Query:'+X)
+    print('Evidence: '+str(e))
+    bn, vars = parser(args.paras[0])
+
+    print('Result: '+str(enumerationAsk(X, e, bn, vars)))
+
+    print('Time used: '+str(time.time() - time1))

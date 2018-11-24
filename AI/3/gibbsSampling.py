@@ -1,10 +1,8 @@
-import sys
-
 import random
 import xml.etree.ElementTree as ET
 import time
 import argparse
-from part1.extra import elimination_ask
+from eliminationAlgo import elimination_ask
 import math
 
 
@@ -32,11 +30,11 @@ def parser(file_name):
     vars = []
 
     if root.tag != 'BIF':
-        print 'Only the semi-standard XMLBIF representation can be processed.'
+        print('Only the semi-standard XMLBIF representation can be processed.')
     else:
         root = root[0]
         if root.tag != 'NETWORK':
-            print 'The file misses a NETWORK tag.'
+            print('The file misses a NETWORK tag.')
         else:
             for i in range(1, len(root)):  # skip the network name
 
@@ -158,11 +156,10 @@ def get_val(X, e, bn, vars, table):
         table.append(single_row)
 
 
-
 def gibbs_ask(X, e, bn, vars, N):
     init_table = [[var for var in vars]]
     for i in range(N):
-        if i!=0 and i%1000==0:
+        if i != 0 and i % 1000 == 0:
             print(i)
         get_val(X, e, bn, vars, init_table)
 
@@ -173,23 +170,24 @@ def gibbs_ask(X, e, bn, vars, N):
         else:
             result_map[False] = result_map[False] + 1
 
-    result_map[True]=float(result_map[True])/(result_map[True]+result_map[False])
-    result_map[False]=1-result_map[True]
+    result_map[True] = float(result_map[True]) / (result_map[True] + result_map[False])
+    result_map[False] = 1 - result_map[True]
 
     return result_map
 
 
 if __name__ == '__main__':
     time1 = time.time()
+    print('start at '+str(time1))
     pars = argparse.ArgumentParser()
     pars.add_argument('paras', type=str, nargs='*')
     args = pars.parse_args()
     print(args.paras)
 
     X, e = formatInput(args.paras)
-    print X, e
+    print(X, e)
 
     bn, vars = parser(args.paras[1])
-    print bn, vars
+    print(bn, vars)
 
     print(gibbs_ask(X, e, bn, vars, int(args.paras[0])))

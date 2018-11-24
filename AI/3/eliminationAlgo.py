@@ -34,11 +34,11 @@ def parser(file_name):
     vars = []
 
     if root.tag != 'BIF':
-        print 'Only the semi-standard XMLBIF representation can be processed.'
+        print('Only the semi-standard XMLBIF representation can be processed.')
     else:
         root = root[0]
         if root.tag != 'NETWORK':
-            print 'The file misses a NETWORK tag.'
+            print('The file misses a NETWORK tag.')
         else:
             for i in range(1, len(root)):  # skip the network name
 
@@ -292,26 +292,22 @@ def elimination_ask(X, e, bn, vars):
 
     norm_final_result(final_result)
 
-    return {final_result[1][final_result[0].index(X)]:final_result[1][-1],final_result[2][final_result[0].index(X)]:final_result[2][-1]}
+    return {final_result[1][final_result[0].index(X)]: final_result[1][-1],
+            final_result[2][final_result[0].index(X)]: final_result[2][-1]}
 
 
 if __name__ == '__main__':
-    # get the problem into the program
-    # argv = 'python enumerationAlgo.py aima-alarm.xml B M true J true'
-    # argv = 'python enumerationAlgo.py aima-wet-grass.xml R S true'
-    # argv = raw_input('input the program invoking command, such as "python enumerationAlgo.py aima-alarm.xml B M true J true"')
-
     time1 = time.time()
+
     pars = argparse.ArgumentParser()
     pars.add_argument('paras', type=str, nargs='*')
     args = pars.parse_args()
-    print(args.paras)
 
     X, e = formatInput(args.paras)
-    print X, e
+    print('Query:' + X)
+    print('Evidence: ' + str(e))
 
     bn, vars = parser(args.paras[0])
-    print bn, vars
 
-    print(elimination_ask(X, e, bn, vars))
-    print(time.time() - time1)
+    print('Result: '+str(elimination_ask(X, e, bn, vars)))
+    print('Time used:'+str(time.time() - time1))

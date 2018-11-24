@@ -1,16 +1,15 @@
-# The enumeration algorithm for answering queries on Bayesian networks, without speedups.
-import sys
-import os
-import argparse
+# The rejection-sampling algorithm for answering queries given evidence in a Bayesian network.
+import random
 import xml.etree.ElementTree as ET
-import matplotlib.pyplot as plt
 import time
+import argparse
 
 
 def formatInput(inputArgv):
     '''format the command line arguments which invoke the program, such as:
-    python enumerationAlgo.py aima-alarm.xml B M true J true'''
-    X = inputArgv[1]
+    python enumerationAlgo.py 1000 aima-alarm.xml B M true J true'''
+    N = inputArgv[0]
+    X = inputArgv[2]
     e = {}
 
     for i in range(0, len(inputArgv)):
@@ -19,7 +18,7 @@ def formatInput(inputArgv):
             e.update({inputArgv[i - 1]: True})
         elif inputArgv[i] == 'false':
             e.update({inputArgv[i - 1]: False})
-    return X, e
+    return N, X, e
 
 
 def parser(file_name):
@@ -31,11 +30,11 @@ def parser(file_name):
     vars = []
 
     if root.tag != 'BIF':
-        print 'Only the semi-standard XMLBIF representation can be processed.'
+        print('Only the semi-standard XMLBIF representation can be processed.')
     else:
         root = root[0]
         if root.tag != 'NETWORK':
-            print 'The file misses a NETWORK tag.'
+            print('The file misses a NETWORK tag.')
         else:
             for i in range(1, len(root)):  # skip the network name
 
@@ -65,7 +64,7 @@ def parser(file_name):
                                         bn.update({var: val})
 
                                     elif root[i][g].tag == 'TABLE':
-                                        prob = [x.strip() for x in root[i][g].text.strip().split('\n')]
+                                        prob = root[i][g].text.strip().split('\n\t')
                                         for r in range(0, len(prob)):
                                             p = float(prob[r].strip().split(' ')[0])
                                             if len(prob) == 2:
@@ -84,20 +83,13 @@ def parser(file_name):
                                                 if r == 3:
                                                     values.update({(False, False): p})
 
+                    #           bn.update({var: val})
+
     # 'J': [['A'],  {(F,): .05, (T,): .90}]
 
-    vars = vars[::-1]  # inverted order, otherwise error - no parents in e
+    # vars = vars[::-1]   # inverted order, otherwise error - no parents in e
+    # in prior sampling, we sample parents before children
     return bn, vars
-
-
-def normalize(QX):
-    '''normalize QX so that the probabilities add up to 1'''
-    sum = 0.0
-    for value in QX.values():
-        sum += value
-    for key in QX.keys():
-        QX[key] /= sum
-    return QX
 
 
 def conditionalPro(var, val, e, bn):
@@ -115,58 +107,68 @@ def conditionalPro(var, val, e, bn):
         return 1.0 - trueP
 
 
-def enumerationAsk(X, e, bn, vars):
+def priorSample(bn):
+    '''a sampling algorithm'''
+    # vars = vars[::-1]   # first reverse variables so they are top down.
+
+    vectorx = {}  # an event with n elements
+
+    for var in vars:
+        trueP = conditionalPro(var, True, vectorx, bn)
+        ran = random.random()  # (0,1)
+        if ran <= trueP:  # a random sample from P(Xi|parents(Xi))
+            vectorx[var] = True
+        else:
+            vectorx[var] = False
+        # vars = vars[::-1]   # reverse variable list again so it is the same as it was before this function was called..
+    return vectorx  # an event sampled from the prior specified by bn
+
+
+def consistent(vectorx, e):
+    for key in vectorx:
+        if key in e and vectorx[key] != e[key]:
+            return False
+    return True
+
+
+def rejectionSampling(X, e, bn, N):
     '''inputs:
-    X: the query variable
-    e: observed values for variables E
-    bn: a Bayes net with variables'''
-    QX = {}  # a distribution over X, initially empty
-    for xi in [False, True]:
-        e[X] = xi  # e extended with X=xi
-        QX[xi] = enumerateAll(vars, e, bn)
-        del e[X]
-    return normalize(QX)  # a distribution over X
+    X, the query variable
+    e, observed values for variables E
+    bn, a Bayesian network
+    N, the total number of samples to be generated'''
+    vectorN = {True: 0, False: 0}  # local variables, a vector of counts for each value of X, initially zero
 
+    for j in range(1, int(N) + 1):
+        vectorx = priorSample(bn)  # vector(x)
 
-def enumerateAll(vars, e, bn):
-    if len(vars) == 0:
-        return 1.0
+        if consistent(vectorx, e):
+            x = vectorx[X]  # where x is the value of X in vector(x)
+            vectorN[x] = vectorN[x] + 1  # count +1
 
-    Y = vars.pop()
-    if Y in e:
-        P = conditionalPro(Y, e[Y], e, bn)
-        val = P * enumerateAll(vars, e, bn)
-        vars.append(Y)
-        return val  # a real number
-    else:  # sum of T&F
-        sum = 0
-        e[Y] = True
-        sum += conditionalPro(Y, True, e, bn) * enumerateAll(vars, e, bn)
-        e[Y] = False
-        sum += conditionalPro(Y, False, e, bn) * enumerateAll(vars, e, bn)
-        del e[Y]
-        vars.append(Y)
-        return sum  # a real number
+    if vectorN[True] == 0 or vectorN[False] == 0:
+        print('The total number of samples to be generated is too small!')
+        return None
+
+    total = float(vectorN[True] + vectorN[False])
+    QX = {True: vectorN[True] / total, False: vectorN[False] / total}
+
+    return QX  # an estimate of P(X|e)
+    # return [QX, N]
 
 
 if __name__ == '__main__':
-    # get the problem into the program
-    # argv = 'python enumerationAlgo.py aima-alarm.xml B M true J true'
-    # argv = 'python enumerationAlgo.py aima-wet-grass.xml R S true'
-    # argv = raw_input('input the program invoking command, such as "python enumerationAlgo.py aima-alarm.xml B M true J true"')
-    print(os.path.exists('aima-wet-grass.xml'))
+    time1 = time.time()
 
-    time1=time.time()
     pars = argparse.ArgumentParser()
-    pars.add_argument('paras', type=str,nargs='*')
+    pars.add_argument('paras', type=str, nargs='*')
     args = pars.parse_args()
-    print(args.paras)
 
-    X, e = formatInput(args.paras)
-    print X, e
-    bn, vars = parser(args.paras[0])
-    print bn, vars
-    # X, e = formatInput(sys.argv)  # one-word character
-    # bn, vars = parser(sys.argv[2])
-    print enumerationAsk(X, e, bn, vars)
-    print(time.time()-time1)
+    N, X, e = formatInput(args.paras)
+    print('Number of samples: ' + str(N))
+    print('Query:' + X)
+    print('Evidence: ' + str(e))
+
+    bn, vars = parser(args.paras[1])
+
+    print('result:' + str(rejectionSampling(X, e, bn, N)))
